@@ -1,4 +1,4 @@
-import 'todo.dart';
+import 'package:i12_into_012/models/todo.dart';
 
 class AppState {
   final List<Todo> todos;
