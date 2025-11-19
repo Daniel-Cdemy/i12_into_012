@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:i12_into_012/models/app_state.dart';
 import 'package:i12_into_012/models/todo.dart';
 import 'package:i12_into_012/services/storage_service.dart';
+import 'package:uuid/uuid.dart';
 
 final storageServiceProvider = Provider<StorageService>((ref) {
   return StorageService();
@@ -14,6 +14,7 @@ final appStateProvider = NotifierProvider<AppStateNotifier, AppState>(
 
 class AppStateNotifier extends Notifier<AppState> {
   late final StorageService _storageService;
+  final Uuid _uuid = const Uuid();
 
   @override
   AppState build() {
@@ -40,7 +41,7 @@ class AppStateNotifier extends Notifier<AppState> {
     if (trimmed.isEmpty) return;
 
     final newTodo = Todo(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: _uuid.v4(),
       text: trimmed,
     );
 
