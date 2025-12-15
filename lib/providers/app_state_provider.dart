@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:i12_into_012/models/app_state.dart';
 import 'package:i12_into_012/models/todo.dart';
+import 'package:i12_into_012/providers/local_json_provider.dart';
 import 'package:i12_into_012/services/storage_service.dart';
 import 'package:uuid/uuid.dart';
 
@@ -8,11 +9,11 @@ final storageServiceProvider = Provider<StorageService>((ref) {
   return StorageService();
 });
 
-final appStateProvider = NotifierProvider<AppStateNotifier, AppState>(
-  AppStateNotifier.new,
+final appStateProvider = NotifierProvider<LocalJsonNotifier, AppState>(
+  LocalJsonNotifier.new,
 );
 
-class AppStateNotifier extends Notifier<AppState> {
+class LocalJsonNotifier extends AppStateNotifier {
   late final StorageService _storageService;
   final Uuid _uuid = const Uuid();
 
