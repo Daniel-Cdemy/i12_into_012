@@ -15,7 +15,6 @@ class SqliteAppStateStorage implements AppStateStorage {
     if (_db != null) return _db!;
     final base = await getDatabasesPath();
     final dbPath = p.join(base, _dbName);
-    print('SQLITE DB PATH: $dbPath');
 
     _db = await openDatabase(
       dbPath,
