@@ -19,14 +19,8 @@ class AppStateNotifier extends Notifier<AppState> {
   }
 
   Future<void> _load() async {
-    final loaded = await _storage.load();
-    if (loaded != null) {
-      state = loaded;
-    }
-  }
-
-  Future<void> _save() async {
-    await _storage.save(state);
+    final loaded = await _storage.loadInitial();
+    state = loaded;
   }
 
   void addTodo(String text) {
@@ -41,16 +35,21 @@ class AppStateNotifier extends Notifier<AppState> {
     state = state.copyWith(
       todos: [...state.todos, newTodo],
     );
-    _save();
+
+    _storage.insertTodo(newTodo);
   }
 
   void toggleTodo(String id) {
-    final updated = state.todos
-        .map((t) => t.id == id ? t.copyWith(isCompleted: !t.isCompleted) : t)
+    final old = state.todos.firstWhere((t) => t.id == id);
+    final updatedTodo = old.copyWith(isCompleted: !old.isCompleted);
+
+    final updatedList = state.todos
+        .map((t) => t.id == id ? updatedTodo : t)
         .toList();
 
-    state = state.copyWith(todos: updated);
-    _save();
+    state = state.copyWith(todos: updatedList);
+
+    _storage.updateTodo(updatedTodo);
   }
 
   void toggleSelection(String id) {
@@ -70,27 +69,38 @@ class AppStateNotifier extends Notifier<AppState> {
   Future<void> deleteSelectedTodos() async {
     if (state.selectedTodoIds.isEmpty) return;
 
+    final idsToDelete = Set<String>.from(state.selectedTodoIds);
+
     final remaining = state.todos
-        .where((t) => !state.selectedTodoIds.contains(t.id))
+        .where((t) => !idsToDelete.contains(t.id))
         .toList();
 
     state = state.copyWith(
       todos: remaining,
       selectedTodoIds: {},
     );
-    await _save();
+
+    await _storage.deleteTodos(idsToDelete);
   }
 
   void toggleDarkMode() {
-    state = state.copyWith(isDarkMode: !state.isDarkMode);
-    _save();
+    final next = !state.isDarkMode;
+    state = state.copyWith(isDarkMode: next);
+
+    _storage.saveSettings(
+      isDarkMode: next,
+      asksForDeletionConfirmation: state.asksForDeletionConfirmation,
+    );
   }
 
   void toggleDeletionConfirmation() {
-    state = state.copyWith(
-      asksForDeletionConfirmation: !state.asksForDeletionConfirmation,
+    final next = !state.asksForDeletionConfirmation;
+    state = state.copyWith(asksForDeletionConfirmation: next);
+
+    _storage.saveSettings(
+      isDarkMode: state.isDarkMode,
+      asksForDeletionConfirmation: next,
     );
-    _save();
   }
 }
 
