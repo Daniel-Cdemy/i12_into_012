@@ -21,32 +21,30 @@ class TodoListScreen extends ConsumerWidget {
 
   Future<void> _deleteSelected(BuildContext context, WidgetRef ref) async {
     final notifier = ref.read(appStateProvider.notifier);
-    final asksForConfirmation = ref.read(asksForDeletionConfirmationProvider);
+    final asks = ref.read(asksForDeletionConfirmationProvider);
 
-    if (asksForConfirmation) {
+    if (asks) {
       final confirm = await showDialog<bool>(
         context: context,
         builder: (_) => AlertDialog(
-          title: const Text('Löschen bestätigen'),
+          title: const Text('Confirm Deletion'),
           content: const Text(
-            'Sind Sie sicher, dass Sie dies löschen möchten?',
+            'Are you sure you want to delete the selected items?',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Abbrechen'),
+              child: const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Löschen'),
+              child: const Text('Delete'),
             ),
           ],
         ),
       );
 
-      if (confirm != true) {
-        return;
-      }
+      if (confirm != true) return;
     }
 
     await notifier.deleteSelectedTodos();
@@ -61,7 +59,7 @@ class TodoListScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: hasSelection
-            ? Text('${selectedIds.length} ausgewählt')
+            ? Text('${selectedIds.length} selected')
             : const Text('Todos'),
         actions: [
           if (hasSelection)
@@ -82,9 +80,7 @@ class TodoListScreen extends ConsumerWidget {
         ],
       ),
       body: todos.isEmpty
-          ? const Center(
-              child: Text("Keine Todo's bisher. Zum hinzufügen + drücken."),
-            )
+          ? const Center(child: Text('No todos yet. Tap + to add one.'))
           : ListView.builder(
               itemCount: todos.length,
               itemBuilder: (context, index) {

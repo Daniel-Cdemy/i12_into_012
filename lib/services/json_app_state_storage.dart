@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:i12_into_012/models/app_state.dart';
+import 'package:i12_into_012/services/app_state_storage.dart';
 import 'package:path_provider/path_provider.dart';
 
-class StorageService {
+class JsonAppStateStorage implements AppStateStorage {
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
     return directory.path;
@@ -15,22 +16,23 @@ class StorageService {
     return File('$path/todo_app_state.json');
   }
 
-  Future<void> saveAppState(AppState state) async {
+  @override
+  Future<void> save(AppState state) async {
     final file = await _localFile;
     final jsonString = jsonEncode(state.toJson());
     await file.writeAsString(jsonString);
   }
 
-  Future<AppState?> loadAppState() async {
+  @override
+  Future<AppState?> load() async {
     try {
       final file = await _localFile;
-      if (!await file.exists()) {
-        return null;
-      }
+      if (!await file.exists()) return null;
+
       final jsonString = await file.readAsString();
       final jsonMap = jsonDecode(jsonString) as Map<String, dynamic>;
       return AppState.fromJson(jsonMap);
-    } catch (e) {
+    } catch (_) {
       return null;
     }
   }

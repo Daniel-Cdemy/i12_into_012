@@ -10,37 +10,37 @@ class AddTodoDialog extends StatefulWidget {
 class _AddTodoDialogState extends State<AddTodoDialog> {
   final _controller = TextEditingController();
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
   void _submit() {
     final text = _controller.text.trim();
     Navigator.of(context).pop(text.isEmpty ? null : text);
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Neue Todo hinzufügen'),
+      title: const Text('Add New Todo'),
       content: TextField(
         controller: _controller,
         autofocus: true,
         decoration: const InputDecoration(
-          hintText: 'Todo Text eingeben...',
+          hintText: 'Enter todo text...',
         ),
         onSubmitted: (_) => _submit(),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(null),
-          child: const Text('Abbrechen'),
+          child: const Text('Cancel'),
         ),
         ElevatedButton(
           onPressed: _submit,
-          child: const Text('Hinzufügen'),
+          child: const Text('Add'),
         ),
       ],
     );

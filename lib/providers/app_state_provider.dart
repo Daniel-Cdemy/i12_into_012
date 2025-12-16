@@ -1,40 +1,32 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:i12_into_012/models/app_state.dart';
 import 'package:i12_into_012/models/todo.dart';
-import 'package:i12_into_012/providers/local_json_provider.dart';
-import 'package:i12_into_012/services/storage_service.dart';
+import 'package:i12_into_012/providers/storage_provider.dart';
 import 'package:uuid/uuid.dart';
 
-final storageServiceProvider = Provider<StorageService>((ref) {
-  return StorageService();
-});
-
-final appStateProvider = NotifierProvider<LocalJsonNotifier, AppState>(
-  LocalJsonNotifier.new,
+final appStateProvider = NotifierProvider<AppStateNotifier, AppState>(
+  AppStateNotifier.new,
 );
 
-class LocalJsonNotifier extends AppStateNotifier {
-  late final StorageService _storageService;
+class AppStateNotifier extends Notifier<AppState> {
+  late final _storage = ref.read(appStateStorageProvider);
   final Uuid _uuid = const Uuid();
 
   @override
   AppState build() {
-    _storageService = ref.read(storageServiceProvider);
-
-    loadState();
-
+    _load();
     return const AppState();
   }
 
-  Future<void> loadState() async {
-    final loaded = await _storageService.loadAppState();
+  Future<void> _load() async {
+    final loaded = await _storage.load();
     if (loaded != null) {
       state = loaded;
     }
   }
 
-  Future<void> saveState() async {
-    await _storageService.saveAppState(state);
+  Future<void> _save() async {
+    await _storage.save(state);
   }
 
   void addTodo(String text) {
@@ -49,18 +41,16 @@ class LocalJsonNotifier extends AppStateNotifier {
     state = state.copyWith(
       todos: [...state.todos, newTodo],
     );
-    saveState();
+    _save();
   }
 
   void toggleTodo(String id) {
     final updated = state.todos
-        .map(
-          (t) => t.id == id ? t.copyWith(isCompleted: !t.isCompleted) : t,
-        )
+        .map((t) => t.id == id ? t.copyWith(isCompleted: !t.isCompleted) : t)
         .toList();
 
     state = state.copyWith(todos: updated);
-    saveState();
+    _save();
   }
 
   void toggleSelection(String id) {
@@ -88,19 +78,19 @@ class LocalJsonNotifier extends AppStateNotifier {
       todos: remaining,
       selectedTodoIds: {},
     );
-    saveState();
+    await _save();
   }
 
   void toggleDarkMode() {
     state = state.copyWith(isDarkMode: !state.isDarkMode);
-    saveState();
+    _save();
   }
 
   void toggleDeletionConfirmation() {
     state = state.copyWith(
       asksForDeletionConfirmation: !state.asksForDeletionConfirmation,
     );
-    saveState();
+    _save();
   }
 }
 

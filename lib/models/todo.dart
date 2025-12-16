@@ -21,30 +21,28 @@ class Todo {
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'text': text,
-      'isCompleted': isCompleted,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'text': text,
+    'isCompleted': isCompleted,
+  };
 
   factory Todo.fromJson(Map<String, dynamic> json) {
     return Todo(
       id: json['id'] as String,
       text: json['text'] as String,
-      isCompleted: json['isCompleted'] as bool? ?? false,
+      isCompleted: (json['isCompleted'] as bool?) ?? false,
     );
   }
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is Todo &&
-        other.id == id &&
-        other.text == text &&
-        other.isCompleted == isCompleted;
-  }
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Todo &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          text == other.text &&
+          isCompleted == other.isCompleted;
 
   @override
   int get hashCode => Object.hash(id, text, isCompleted);
